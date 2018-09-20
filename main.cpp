@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-// Hansaem Chung 1025079 / Hanseop Yoo 1025078
+
 using namespace std;
 
 
