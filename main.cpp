@@ -1,195 +1,170 @@
 #include <iostream>
-#include <cmath>
-
+#include <fstream>
+#include <cassert>
+#include <string.h>
+//s1025079 Hansaem Chung & s1025078 Hanseop Yoo
 using namespace std;
 
+enum Cell {Dead=0, Live};                         // a cell is either Dead or Live (we use the fact that dead = 0 and live = 1)
 
-void inclusion (double e, double v)
+const char DEAD             = '.' ;               // the presentation of a dead cell (both on file and screen)
+const char LIVE             = '*' ;               // the presentation of a live cell (both on file and screen)
+const int NO_OF_ROWS        = 40 ;                // the number of rows (height) of the universe (both on file and screen)
+const int NO_OF_COLUMNS     = 60 ;                // the number of columns (width) of the universe (both on file and screen)
+const int ROWS              = NO_OF_ROWS    + 2 ; // the number of rows in a universe array, including the 'frame' of dead cells
+const int COLUMNS           = NO_OF_COLUMNS + 2 ; // the number of columns in a universe array, including the 'frame' of dead cells
+
+const int MAX_FILENAME_LENGTH = 80 ;              // the maximum number of characters for a file name (including termination character)
+
+#include <string>
+//  Part 1: one-dimensional arrays
+int find_index(char filename [MAX_FILENAME_LENGTH])
 {
-    double a=0, x, i =0 ;
-    //declare a, x, i
-    if (v == 0)
-        x= 0;
-    // if v is 0, x(result output) is 0
-    else if (v==1)
-        x= 1;
-    // if v is 0, x(result output) is 0
-    else if (v<0)
-        cout <<"type bigger that 0"<<endl;
-    // if v is smaller than 0, print above error message
+    int index = 0;
+    for(index =0; index < MAX_FILENAME_LENGTH; index++)
+    {
+        if(filename[index] == '\0')
+            return index;
+    }
+}
+
+bool enter_filename (char filename [MAX_FILENAME_LENGTH])
+{
+    assert (find_index(filename) <= MAX_FILENAME_LENGTH);
+    if(find_index(filename)+1 <= MAX_FILENAME_LENGTH )
+        return true;
     else
-        {
-        double b = max(1.0,v);
-        // after compare 1 and v, it input the bigger output in b
-        x = (a+b)/2;
-        // x is (a+b)/2
+        return false;
+}
 
-        cout <<" i = "<<i<<", a" << i <<" = "<<a<<", b"<<i<<" = "<<b<<", x"<<i<<" = "<<x<<endl;
-        // print i=0's case
-        while(abs(x*x-v) > e)
+
+//  Part 2: setting the scene
+bool read_universe_file (ifstream& inputfile, Cell universe [ROWS][COLUMNS])
+{
+    assert(inputfile.is_open());
+    // pre-conditions
+
+    for (int i = 0 ; i < NO_OF_COLUMNS;i++)
+    {
+        for(int j = 0 ; j < NO_OF_ROWS;j++)
             {
-            i++;
-            // count the i
-
-            if (x*x<v)
+                char c = inputfile.get();
+                cout<<c;
+                if (c == DEAD)
                 {
-                a=x;
-                b=b;
+                    universe[i][j] = Dead;
+                }
+                else if (c == LIVE)
+                {
+
+                    universe[i][j] = Live;
+                }
+                else
+                {
+                    //cout<< "end";
+                    //return false;
                 }
 
-            else
-                {
-                a=a;
-                b=x;
-                }
-
-            x= (a+b)/2;
-            cout <<" i = "<<i<<", a" << i <<" = "<<a<<", b"<<i<<" = "<<b<<", x"<<i<<" = "<<x<<endl;
-            // print i repeatedly by using cout in the while syntax
 
             }
-        }
-        cout <<"Inclusion square root of "<<v<<" is "<<x<<" for epsilon "<<e<< endl;
+        return true;
+        return universe;
+    }
+
 }
 
-void newton_raphson (double e, double v)
+void show_universe (Cell universe [ROWS][COLUMNS])
 {
-    double x, i=0;
-    //declare x, i=0
-    if (v == 0)
-        x= 0;
-    // if v is 0, x(result output) is 0
-    else if (v==1)
-        x= 1;
-    // if v is 1, x(result output) is 1
-    else
-    {
-        x= max(1.0,v);
-        cout <<" i = "<<i<<", x" << i <<" = "<<x<<endl;
 
-        // print when i = 0's output
-        while(abs(x*x-v) > e)
+    // pre-conditions
+    assert(true)
+    //post-conditions, implementation
+    //it shows universe one by one.
+    for (int i = 0; i < NO_OF_COLUMNS; i++){
+        for (int j = 0 ; j < NO_OF_ROWS ; j ++){
+        cout << universe[i][j]<<" " ;
+        }
+        cout<< "\n";
+        }
+}
+
+//  Part 3: the next generation
+void next_generation (Cell now [ROWS][COLUMNS], Cell next [ROWS][COLUMNS])
+{
+    // pre-conditions
+    assert(true)
+    //post-conditions, implementation
+    // when now is live, it compare sum in 3 case
+    // sum <2 , sum =2or3 , sum > 3 and according to this decide next
+    // when now is dead, it compare whether sum is 3 or not
+    // and decide next
+    int sum=0;
+        for (int i = 1; i < COLUMNS; i++){
+        for (int j = 1 ; j < ROWS ; j ++){
+        if (now[i][j]==Live)
         {
-            i++;
-            x = x - (x*x-v)/(2*x);
-            x= x;
-            cout <<" i = "<<i<<", x" << i <<" = "<<x<<endl;
-            // print i repeatedly by using cout in the while syntax
+                for (int a = -1; a < 2; a++){
+                for (int b = -1 ; b < 2 ; b ++){
+                 sum= sum+now[i-a][i-b];
+                 cout<<now[i][j];
+                }
+                sum= sum- now[i][j];
+
+                }
+            if(sum < 2)
+            {
+                next[i][j]=Dead;
+            }
+            else if (sum==2 ||sum==3){
+                next[i][j]=Live;
+            }
+            else{
+                next[i][j]=Dead;
+            }
+
 
         }
-    }
-    cout <<"Newton_raphson square root of "<<v<<" is "<<x<<" for epsilon "<<e<< endl;
+        if (now[i][j]==Dead)
+        {
+                for (int a = -1; a < 2; a++){
+                for (int b = -1 ; b < 2 ; b ++){
+                 sum= sum+now[i-a][i-b];
+                 cout<<now[i][j];
+                }
+                sum= sum- now[i][j];
+
+                }
+            if(sum == 3)
+            {
+                next[i][j]=Live;
+            }
+
+            else{
+                next[i][j]=Dead;
+            }
+        }
+        }
+}
 }
 
-
-
-
-void test_inclusion()
-{
-    cout<<endl<<"@@@@@@@@ test the inclusion @@@@@@"<< endl;
-    double e = 0.1 ;
-    while (e >=0.00001)
-    {
-        inclusion(e,0.0);
-        inclusion(e,1.0);
-        inclusion(e,0.6);
-        inclusion(e,36.0);
-        inclusion(e,333333.3333);
-
-        e = e/10;
-    }
-    cout << endl << "@@@@@@@@@ test inclusion done @@@@@"<< endl;
-}
-
-void test_newton_raphson()
-{
-    cout<<endl<<"@@@@@@@@ test the newton_raphson @@@@@@"<< endl;
-    double e = 0.1 ;
-    while (e >=0.00001)
-    {
-        newton_raphson(e,0.0);
-        newton_raphson(e,1.0);
-        newton_raphson(e,0.6);
-        newton_raphson(e,36.0);
-        newton_raphson(e,333333.3333);
-
-        e = e/10;
-    }
-    cout << endl << "@@@@@@@@@ test newton_raphson done @@@@@"<< endl;
-}
-
-int main()
+int main ()
 {
 
-    double e,v;
-    cout << "Enter the epsilon(range of Error) ";
-    cin >> e;
-    cout << "Enter the Value ";
-    cin >> v;
-    newton_raphson(e,v);
-    cout << "\t" <<endl;
-    inclusion(e,v);
+Cell universe[ROWS][COLUMNS];
+Cell universe2[ROWS][COLUMNS];
+ifstream filename("aa.txt");
+if (!read_universe_file(filename,universe)){
+    cout << "Program aborted." << endl ;
+    return  -1;
+        }
+next_generation(universe,universe2);
 
-   // test_inclusion();
-   // test_newton_raphson();
-    //return 0;
 
-}
-//in the case of e = 0.1 and v = 10 , Newton repeat 4 times but inclusion repeat 7 times
-// this shows that Newton is better than inclusion
+//show_universe(universe);
 /*
-This is test result.
-@@@@@@@@ test the inclusion @@@@@@
-Inclusion square root of 0 is 0 for epsilon 0.1
-Inclusion square root of 1 is 1 for epsilon 0.1
-Inclusion square root of 0.6 is 0.75 for epsilon 0.1
-Inclusion square root of 36 is 5.99414 for epsilon 0.1
-Inclusion square root of 333333 is 577.35 for epsilon 0.1
-Inclusion square root of 0 is 0 for epsilon 0.01
-Inclusion square root of 1 is 1 for epsilon 0.01
-Inclusion square root of 0.6 is 0.773438 for epsilon 0.01
-Inclusion square root of 36 is 6.00073 for epsilon 0.01
-Inclusion square root of 333333 is 577.35 for epsilon 0.01
-Inclusion square root of 0 is 0 for epsilon 0.001
-Inclusion square root of 1 is 1 for epsilon 0.001
-Inclusion square root of 0.6 is 0.774414 for epsilon 0.001
-Inclusion square root of 36 is 6.00005 for epsilon 0.001
-Inclusion square root of 333333 is 577.35 for epsilon 0.001
-Inclusion square root of 0 is 0 for epsilon 0.0001
-Inclusion square root of 1 is 1 for epsilon 0.0001
-Inclusion square root of 0.6 is 0.774658 for epsilon 0.0001
-Inclusion square root of 36 is 5.99999 for epsilon 0.0001
-Inclusion square root of 333333 is 577.35 for epsilon 0.0001
-Inclusion square root of 0 is 0 for epsilon 1e-005
-Inclusion square root of 1 is 1 for epsilon 1e-005
-Inclusion square root of 0.6 is 0.774597 for epsilon 1e-005
-Inclusion square root of 36 is 6 for epsilon 1e-005
-Inclusion square root of 333333 is 577.35 for epsilon 1e-005
-
-@@@@@@@@ test the newton_raphson @@@@@@
-Newton_raphson square root of 0 is 0 for epsilon 0.1
-Newton_raphson square root of 1 is 1 for epsilon 0.1
-Newton_raphson square root of 0.6 is 0.8 for epsilon 0.1
-Newton_raphson square root of 36 is 6.00025 for epsilon 0.1
-Newton_raphson square root of 333333 is 577.35 for epsilon 0.1
-Newton_raphson square root of 0 is 0 for epsilon 0.01
-Newton_raphson square root of 1 is 1 for epsilon 0.01
-Newton_raphson square root of 0.6 is 0.775 for epsilon 0.01
-Newton_raphson square root of 36 is 6.00025 for epsilon 0.01
-Newton_raphson square root of 333333 is 577.35 for epsilon 0.01
-Newton_raphson square root of 0 is 0 for epsilon 0.001
-Newton_raphson square root of 1 is 1 for epsilon 0.001
-Newton_raphson square root of 0.6 is 0.775 for epsilon 0.001
-Newton_raphson square root of 36 is 6 for epsilon 0.001
-Newton_raphson square root of 333333 is 577.35 for epsilon 0.001
-Newton_raphson square root of 0 is 0 for epsilon 0.0001
-Newton_raphson square root of 1 is 1 for epsilon 0.0001
-Newton_raphson square root of 0.6 is 0.774597 for epsilon 0.0001
-Newton_raphson square root of 36 is 6 for epsilon 0.0001
-Newton_raphson square root of 333333 is 577.35 for epsilon 0.0001
-Newton_raphson square root of 0 is 0 for epsilon 1e-005
-Newton_raphson square root of 1 is 1 for epsilon 1e-005
-Newton_raphson square root of 0.6 is 0.774597 for epsilon 1e-005
-Newton_raphson square root of 36 is 6 for epsilon 1e-005
-Newton_raphson square root of 333333 is 577.35 for epsilon 1e-005
+cout << "enter filename";
+char filename[FILENAME_MAX];
+cin.getline(filename,FILENAME_MAX);
 */
+//enter_filename(filename);
+}
